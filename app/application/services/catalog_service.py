@@ -29,3 +29,7 @@ class CatalogService:
     def lister_mes_plats(self, chef_id):
         """Récupère tous les plats appartenant à un chef"""
         return self.meal_repo.get_meals_by_chef(chef_id)
+        
+        
+    def rechercher_repas(self, category_id=None, price_max=None):
+        return self.meal_repo.get_available_meals(category_id, price_max)
