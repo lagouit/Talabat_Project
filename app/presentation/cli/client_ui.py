@@ -1,10 +1,14 @@
 import os
 from app.application.services.catalog_service import CatalogService
+from app.core.models.order import Order, OrderLine
+from app.application.services.order_service import OrderService
 
 class ClientUI:
     def _init_(self, client_user):
         self.client = client_user
         self.catalog_service = CatalogService()
+        self.order_service = OrderService()
+        self.panier = None # Contiendra l'objet Order en cours
 
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
