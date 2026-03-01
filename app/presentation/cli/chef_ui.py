@@ -45,7 +45,11 @@ class ChefUI:
                 input(f"✅ Commande {cid} est maintenant : {new_s}. Entrée...")
             else:
                 input("❌ Erreur lors du changement. Entrée...")
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> ded78611a9c4fd8014ace1aa2a65179b00acc9d5
     def menu_principal(self):
         while True:
             self.clear_screen()
@@ -63,8 +67,11 @@ class ChefUI:
                 self.afficher_mes_plats()
             elif choix == "2":
                 self.formulaire_ajout_plat()
+<<<<<<< HEAD
             elif choix == "3":
                 self.gerer_commandes_recues()
+=======
+>>>>>>> ded78611a9c4fd8014ace1aa2a65179b00acc9d5
             elif choix == "4":
                 break
 
