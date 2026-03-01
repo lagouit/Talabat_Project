@@ -4,7 +4,7 @@ from app.core.models.order import Order, OrderLine
 from app.application.services.order_service import OrderService
 
 class ClientUI:
-    def _init_(self, client_user):
+    def __init__(self, client_user):
         self.client = client_user
         self.catalog_service = CatalogService()
         self.order_service = OrderService()
