@@ -2,6 +2,7 @@ import os
 from app.application.services.catalog_service import CatalogService
 from app.core.models.order import Order, OrderLine
 from app.application.services.order_service import OrderService
+from app.application.services.payment_service import PaymentService
 
 class ClientUI:
     def __init__(self, client_user):
@@ -9,6 +10,8 @@ class ClientUI:
         self.catalog_service = CatalogService()
         self.order_service = OrderService()
         self.panier = None # Contiendra l'objet Order en cours
+        self.payment_service = PaymentService()
+
 
     def ajouter_au_panier(self, meal_id):
         """Ajoute un plat au panier en mémoire"""
@@ -66,6 +69,24 @@ class ClientUI:
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
+    def gerer_paiements(self):
+        self.clear_screen()
+        print("COMMANDES EN ATTENTE DE PAIEMENT")
+        # Ici on simplifie en récupérant la commande qu'on vient juste de créer
+        # Dans un vrai projet, on listerait les commandes avec statut 'ATTENTE_PAIEMENT'
+        
+        cmd_id = input("\nEntrez l'ID de la commande à payer (ou 0 pour retour) : ")
+        if cmd_id == "0": return
+
+        print(f"\nConnexion à la passerelle de paiement sécurisée")
+        success, msg = self.payment_service.effectuer_paiement_sequestre(int(cmd_id))
+        
+        if success:
+            print("ARGENT BLOQUÉ EN SÉQUESTRE")
+            input(f"{msg}\nAppuyez sur Entrée")
+        else:
+            input(f"{msg}\nAppuyez sur Entrée")
+
     def menu_principal(self):
         while True:
             self.clear_screen()
@@ -75,6 +96,7 @@ class ClientUI:
             print("2. Filtrer par catégorie")
             print("3. Filtrer par prix maximum")
             print("4. Déconnexion")
+            print("5. Mes commandes à payer")
             
             choix = input("\nVotre choix : ")
 
