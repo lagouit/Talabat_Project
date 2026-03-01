@@ -1,10 +1,67 @@
 import os
 from app.application.services.catalog_service import CatalogService
+from app.core.models.order import Order, OrderLine
+from app.application.services.order_service import OrderService
 
 class ClientUI:
     def _init_(self, client_user):
         self.client = client_user
         self.catalog_service = CatalogService()
+        self.order_service = OrderService()
+        self.panier = None # Contiendra l'objet Order en cours
+
+    def ajouter_au_panier(self, meal_id):
+        """Ajoute un plat au panier en mémoire"""
+        # 1. On récupère les détails du plat via le service
+        # Pour simplifier, on recherche le plat dans la liste globale
+        repas_liste = self.catalog_service.rechercher_repas()
+        plat_choisi = next((r for r in repas_liste if r['id'] == int(meal_id)), None)
+
+        if not plat_choisi:
+            input("Plat introuvable. Entrée...")
+            return
+
+        try:
+            qte = int(input(f"Quantité pour '{plat_choisi['titre']}' : "))
+        except ValueError:
+            input("Quantité invalide. Entrée...")
+            return
+
+        # 2. Initialiser la commande si c'est le premier article
+        if self.panier is None:
+            self.panier = Order(beneficiaire_id=self.client.id, fournisseur_id=plat_choisi['fournisseur_id'])
+        
+        # 3. Vérifier que c'est le même chef (règle métier : 1 commande = 1 chef)
+        if self.panier.fournisseur_id != plat_choisi['fournisseur_id']:
+            input("Erreur : Vous ne pouvez commander chez deux chefs différents en même temps. Videz votre panier d'abord.")
+            return
+
+        # 4. Ajouter la ligne
+        ligne = OrderLine(plat_choisi['id'], plat_choisi['titre'], plat_choisi['prix'], qte)
+        self.panier.lignes.append(ligne)
+        input(f"Produit ajouté ! Total actuel : {self.panier.calculer_total()} DH. Entrée...")
+
+    def voir_panier_et_valider(self):
+        """Affiche le récapitulatif et enregistre en BDD"""
+        self.clear_screen()
+        if not self.panier or not self.panier.lignes:
+            input("Votre panier est vide. Appuyez sur Entrée...")
+            return
+
+        print("--- VOTRE PANIER ---")
+        for l in self.panier.lignes:
+            print(f"- {l.titre} x{l.quantite} : {l.prix_unitaire * l.quantite} DH")
+        
+        total = self.panier.calculer_total()
+        print(f"\nTOTAL À PAYER : {total} DH")
+        print("--------------------")
+        
+        confirm = input("Valider la commande ? (o/n) : ")
+        if confirm.lower() == 'o':
+            success, msg = self.order_service.valider_commande(self.panier)
+            if success:
+                self.panier = None # On vide le panier après succès
+            input(f"\n{msg} Appuyez sur Entrée...")
 
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
